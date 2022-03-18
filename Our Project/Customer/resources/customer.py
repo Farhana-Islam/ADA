@@ -48,6 +48,29 @@ class CustomerProfile:
             session.close()
             return jsonify({'message': f'There is no customer with id {c_id}'}), 404
 
+
+    @staticmethod
+    def get_all_customer():
+        session = Session()
+        customers = session.query(CustomerDAO).all()
+        text_out = {}
+        if customers:
+            for customer in customers:
+                text_out['Customer_id: '+str(customer.id)] = {
+                                    "name": customer.name,
+                                    "address": customer.address,
+                                    "contact_number": customer.contact_number,
+                                    "email": customer.email,
+                                    "status": customer.status
+                                        }
+            session.close()
+            return jsonify(text_out), 200
+        else:
+            session.close()
+            return jsonify({'message': f'There is no customer in database'}), 404
+
+
+
     @staticmethod
     def delete(c_id):
         session = Session()
@@ -70,15 +93,34 @@ class CustomerProfile:
             if customer.password == password:
                 customer.status = 'logged in'
                 session.commit()
-                return jsonify({'message': f'Successfully logged in.Your ID is {customer.id}.You can update or delete '
-                                           f'your profile based on this ID'}), 200
+                return jsonify({'message': f'Successfully logged in.Your ID is {customer.id}.You can update '
+                                           f'or delete your profile based on this ID'}), 200
             else:
                 session.close()
                 return jsonify({'message': f'Incorrect password'}), 404
 
         else:
             session.close()
-            return jsonify({'message': f'Invalid Email'}), 404
+            return jsonify({'message': f'No account exits. Please try again'}), 404
+
+
+    @staticmethod
+    def customer_logout(c_id):
+        session = Session()
+        customer = session.query(CustomerDAO).filter(CustomerDAO.id == c_id).first()
+        if customer:
+            if customer.status != 'logged in':
+                session.close()
+                return jsonify({'message': f'Please Login First'}), 404
+            else:
+                customer.status = 'logout'
+                session.commit()
+                session.close()
+                return jsonify({'message': f'Successfully Logged Out'}), 200
+        else:
+            session.close()
+            return jsonify({'message': f'There is no customer with id {c_id}'}), 404
+
 
     @staticmethod
     def update_customer(id, email=None, password=None, address= None, contact_number= None, name= None):

@@ -17,8 +17,13 @@ def add_customer():
 
 
 @app.route('/customers/<c_id>', methods=['GET'])
-def get_delivery(c_id):
+def get_one_customer(c_id):
     return CustomerProfile.get(c_id)
+
+
+@app.route('/customers/getAll', methods=['GET'])
+def get_all_customer():
+    return CustomerProfile.get_all_customer()
 
 
 @app.route('/customers/<c_id>', methods=['DELETE'])
@@ -32,6 +37,11 @@ def customer_login():
     password = request.args.get('password')
     return CustomerProfile.customer_login(email, password)
 # example    http://localhost:5002/customers/login?email=abc@gmail.com&password=123
+
+
+@app.route('/customers/<c_id>/logout', methods=['PUT'])
+def customer_logout(c_id):
+    return CustomerProfile.customer_logout(c_id)
 
 
 @app.route('/customers/<id>/update', methods=['PUT'])
@@ -48,7 +58,7 @@ def update_customer(id, email=None, password=None, address= None, contact_number
     elif req_data.get('name'):
         name = req_data.get('name')
     return CustomerProfile.update_customer(id, email, password, address, contact_number, name)
-# example    http://localhost:5002/customers/4/
+
 
 
 
