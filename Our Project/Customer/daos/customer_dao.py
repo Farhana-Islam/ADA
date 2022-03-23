@@ -19,13 +19,15 @@ class CustomerDAO(Base):
     email = Column(EmailType, unique=True, nullable=False)
     password = Column(PasswordType(schemes=['pbkdf2_sha512','md5_crypt'], deprecated=['md5_crypt']),
                 unique=False, nullable=False)
+    bank_account_number = Column(String(100), nullable=False)
 
 
-    def __init__(self,  name, address, contact_number, email, password, status):
+    def __init__(self,  name, address, contact_number, email, password, status, bank_account_number):
         self.name = name
         self.address = address
         self.contact_number = contact_number
         self.email = email
         self.password = password
         self.status = status
+        self.bank_account_number = bank_account_number
 

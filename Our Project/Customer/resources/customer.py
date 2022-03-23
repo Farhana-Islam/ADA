@@ -11,7 +11,7 @@ class CustomerProfile:
     def create(body):
         session = Session()
         customer = CustomerDAO(body['name'], body['address'],
-                               body['contact_number'], body['email'], body['password'], STATUS)
+                               body['contact_number'], body['email'], body['password'], STATUS, body['bank_account_number'],)
 
         valid_email = session.query(CustomerDAO).filter(CustomerDAO.email == customer.email).first()
 
@@ -28,8 +28,6 @@ class CustomerProfile:
     @staticmethod
     def get(c_id):
         session = Session()
-        # https://docs.sqlalchemy.org/en/14/orm/query.html
-        # https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_using_query.htm
         customer = session.query(CustomerDAO).filter(CustomerDAO.id == c_id).first()
 
         if customer:
@@ -39,7 +37,7 @@ class CustomerProfile:
                 "address": customer.address,
                 "contact_number": customer.contact_number,
                 "email": customer.email,
-                #"password": customer.password,
+                "bank_account_number": customer.bank_account_number,
                 "status": customer.status
             }
             session.close()
@@ -61,6 +59,7 @@ class CustomerProfile:
                                     "address": customer.address,
                                     "contact_number": customer.contact_number,
                                     "email": customer.email,
+                                    "bank_account_number": customer.bank_account_number,
                                     "status": customer.status
                                         }
             session.close()
@@ -123,24 +122,35 @@ class CustomerProfile:
 
 
     @staticmethod
-    def update_customer(id, email=None, password=None, address= None, contact_number= None, name= None):
+    def update_customer(id,name=None,address=None,contact_number=None,email=None,password=None,bank_account_number=None):
         session = Session()
         customer = session.query(CustomerDAO).filter(CustomerDAO.id == id).first()
-        if customer.status != "logged in":
-            session.close()
-            return jsonify({'message': f'Please Log In'}), 404
-        else:
-            if email is not None:
-                customer.email = email
-            elif password is not None:
-                customer.password = password
-            elif name is not None:
-                customer.name = name
-            elif address is not None:
-                customer.address = address
-            elif contact_number is not None:
-                customer.contact_number = contact_number
-            session.commit()
-            session.close()
-            return jsonify({'message': f'Your Profile Updated Successfully Updated'}), 200
+        if customer:
+            if customer.status != "logged in":
+                session.close()
+                return jsonify({'message': f'Please Log In'}), 404
+            else:
+                if name is not None:
+                    customer.name = name
+                if address is not None:
+                    customer.address = address
+                if contact_number is not None:
+                    customer.contact_number = contact_number
+                if email is not None:
+                    email_in_use = session.query(CustomerDAO).filter(CustomerDAO.email == email).first()
 
+                    if email_in_use:
+                        session.close()
+                        return jsonify({'message': f'Email already in use, please use different email address'}), 404
+                    else:
+                        customer.email = email
+                if password is not None:
+                    customer.password = password
+                if bank_account_number is not None:
+                    customer.bank_account_number = bank_account_number
+                session.commit()
+                session.close()
+                return jsonify({'message': f'Your Profile Updated Successfully Updated'}), 200
+        else:
+            session.close()
+            return jsonify({'message': f'There is no customer with id {id}'}), 404

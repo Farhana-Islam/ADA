@@ -7,8 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config["DEBUG"] = True
 Base.metadata.create_all(engine)
-ab= SQLAlchemy(app)
-migrate = Migrate(app, ab)
+#ab= SQLAlchemy(app)
+#migrate = Migrate(app, ab)
 
 @app.route('/customers', methods=['POST'])
 def add_customer():
@@ -45,19 +45,21 @@ def customer_logout(c_id):
 
 
 @app.route('/customers/<id>/update', methods=['PUT'])
-def update_customer(id, email=None, password=None, address= None, contact_number= None, name= None):
+def update_customer(id,name=None,address=None,contact_number=None,email=None,password=None,bank_account_number=None):
     req_data = request.get_json()
+    if req_data.get('name'):
+        name = req_data.get('name')
+    if req_data.get('address'):
+        address = req_data.get('address')
+    if req_data.get('contact_number'):
+        contact_number = req_data.get('contact_number')
     if req_data.get('email'):
         email = req_data.get('email')
-    elif req_data.get('password'):
+    if req_data.get('password'):
         password = req_data.get('password')
-    elif req_data.get('address'):
-        address = req_data.get('address')
-    elif req_data.get('contact_number'):
-        contact_number = req_data.get('contact_number')
-    elif req_data.get('name'):
-        name = req_data.get('name')
-    return CustomerProfile.update_customer(id, email, password, address, contact_number, name)
+    if req_data.get('bank_account_number'):
+        bank_account_number = req_data.get('bank_account_number')
+    return CustomerProfile.update_customer(id, name, address, contact_number, email, password, bank_account_number)
 
 
 
